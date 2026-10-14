@@ -1,0 +1,45 @@
+# SPDX-FileCopyrightText: Copyright Logically Magic Inc. <hello@logicallymagic.com>
+# SPDX-FileCopyrightText: Copyright Hamid Jahanzad <Hamid@Jahanzad.com>
+# SPDX-FileCopyrightText: Copyright Contributors to the Sentin8:Web
+# SPDX-License-Identifier: Apache-2.0
+
+[package]
+name = "sentin8-web"
+version = "0.1.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/Sentin8/sentin8-web"
+rust-version = "1.85"
+description = "Sentin8 Sentin8:Web — single-instance static file server for all app-store Flutter web apps, with Sentin8:TLS termination via sentin8-tls."
+
+[[bin]]
+name = "sentin8-web"
+path = "src/main.rs"
+
+[dependencies]
+# THE SDK pin (RS 2.3) - the only cross-repo dependency. It carries the
+# entire shared library workspace (core/identity/tls/bus/shield/shell +
+# every web-client/contracts SDK crate) behind the `sentin8` facade.
+sentin8 = { git = "https://github.com/Sentin8/sentin8-sdk", tag = "sdk-v0.6.3" }
+
+sqlx = { version = "0.8", features = ["runtime-tokio", "tls-rustls-ring", "postgres", "uuid", "chrono", "json", "macros"] }
+axum = { version = "0.8", features = ["macros"] }
+tokio = { version = "1", features = ["full"] }
+tower = { version = "0.5", features = ["util"] }
+tower-http = { version = "0.7", features = ["trace", "cors", "compression-gzip", "limit"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+dotenvy = "0.15"
+anyhow = "1"
+# Valkey GLIDE — the platform's mandated client engine (group DESIGN.md §3.1).
+valkey-glide = "0.9.0"
+reqwest = { version = "0.12", features = ["json", "rustls-tls-native-roots-no-provider", "json"], default-features = false }
+rustls = { version = "0.23", features = ["std", "tls12", "logging"], default-features = false }
+rustls-graviola = "0.4"
+mime_guess = "2"
+tokio-util = { version = "0.7", features = ["io"] }
+percent-encoding = "2"
+uuid = { version = "1", features = ["v4", "v5", "serde"] }
+tempfile = "3"

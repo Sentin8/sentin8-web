@@ -1,0 +1,82 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id AS \"id!\", env_id AS \"env_id!\", service AS \"service!\",\n                      policy_set_name AS \"policy_set_name!\",\n                      description AS \"description!\", policies AS \"policies!\",\n                      schema,\n                      origin AS \"origin!: PolicyOrigin\",\n                      mode AS \"mode!: PolicyMode\", version AS \"version!\",\n                      enabled AS \"enabled!\"\n               FROM sentin8_boot_policy_load($1)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "env_id!",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "service!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "policy_set_name!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "description!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "policies!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "schema",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 7,
+        "name": "origin!: PolicyOrigin",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 8,
+        "name": "mode!: PolicyMode",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 9,
+        "name": "version!",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 10,
+        "name": "enabled!",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "c1c8a8b7e70c236260f009e7d78d71c90d5623b858c428db33d8bea09339b720"
+}
