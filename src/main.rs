@@ -71,9 +71,8 @@ async fn main() -> anyhow::Result<()> {
     // only when the per-service var is unset — local test harnesses; the
     // deployed posture is the dedicated role.
     {
-        let dsn = std::env::var("SENTIN8_WEB_DATABASE_URL").unwrap_or_else(|_| {
-            sentin8::config::Sentin8Config::default_database_url().to_string()
-        });
+        let dsn = std::env::var("SENTIN8_WEB_DATABASE_URL")
+            .unwrap_or_else(|_| sentin8::config::Sentin8Config::default_database_url().to_string());
         let pool = sentin8::config::pg_pool::connect(&dsn)
             .await
             .map_err(|e| anyhow::anyhow!("policy boot pool: {e}"))?;
@@ -210,10 +209,7 @@ async fn main() -> anyhow::Result<()> {
                 }
             });
         }
-        match sentin8::middleware::valkey_client(&valkey_url, "sentin8:web").await {
-            Ok(client) => Some(client),
-            Err(_) => None,
-        }
+        sentin8::middleware::valkey_client(&valkey_url, "sentin8:web").await.ok()
     } else {
         None
     };
@@ -880,4 +876,3 @@ mod tests {
         assert_eq!("".split('.').next().unwrap_or(""), "");
     }
 }
-
