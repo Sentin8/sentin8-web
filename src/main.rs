@@ -209,7 +209,9 @@ async fn main() -> anyhow::Result<()> {
                 }
             });
         }
-        sentin8::middleware::valkey_client(&valkey_url, "sentin8:web").await.ok()
+        sentin8::middleware::valkey_client(&valkey_url, "sentin8:web")
+            .await
+            .ok()
     } else {
         None
     };
