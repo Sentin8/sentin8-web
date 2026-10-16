@@ -4,7 +4,11 @@
     {
       "service_type": "sentin8:web",
       "subdomain": "web",
-      "binary": "sentin8-web"
+      "binary": "sentin8-web",
+      "telemetry_property": {
+        "slug": "web",
+        "name": "Sentin8:Web Platform Telemetry"
+      }
     }
   ]
 }
