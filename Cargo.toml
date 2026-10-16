@@ -20,7 +20,7 @@ path = "src/main.rs"
 # THE SDK pin (RS 2.3) - the only cross-repo dependency. It carries the
 # entire shared library workspace (core/identity/tls/bus/shield/shell +
 # every web-client/contracts SDK crate) behind the `sentin8` facade.
-sentin8 = { git = "https://github.com/Sentin8/sentin8-sdk", tag = "sdk-v0.6.4" }
+sentin8 = { git = "https://github.com/Sentin8/sentin8-sdk", tag = "sdk-v0.6.5" }
 
 sqlx = { version = "0.8", features = ["runtime-tokio", "tls-rustls-ring", "postgres", "uuid", "chrono", "json", "macros"] }
 axum = { version = "0.8", features = ["macros"] }
