@@ -1,4 +1,4 @@
-# DESIGN.md: Sentin8:Web — Detailed Design Document
+# Sentin8:Web — Detailed Design Document
 
 ## 1. Scope & Context
 
