@@ -7,14 +7,14 @@
 //!
 //! The RFW renderer host describes itself to `vertical enroll` via
 //! `--print-registration`. Its M2M grants declare:
-//! - `sentin8:web-policy` — the Shield hot-reload consumer
+//! - `sentin8:web-policy` - the Shield hot-reload consumer
 //!   (`policy_bus_client("sentin8:web")` → `{service}-policy`).
 
 use sentin8::registration::{AdminScope, M2mGrant, PgRole, Registration};
 
 const M2M_GRANTS: &[M2mGrant] = &[
     // The web host's own Valkey-plane identity (group DESIGN.md §3.1):
-    // the app-dir discovery client's cert-CN workload. No scopes — it
+    // the app-dir discovery client's cert-CN workload. No scopes - it
     // exists for the enroll-time ACL provisioning (`~captain:app_dir:*`
     // reads) and the token-free registry map.
     M2mGrant {
@@ -25,7 +25,7 @@ const M2M_GRANTS: &[M2mGrant] = &[
         workload: "sentin8:web-policy",
         scopes: &["sentin8:bus:consume"],
     },
-    // TLS-RLS-4 (design/sentin8-vertical-data-plane-contract.md §VDC.7): the database-free HostContextResolver’s resolve workload — cache miss calls Sys `GET /v1/resolve/hostname`.
+    // TLS-RLS-4 (design/sentin8-vertical-data-plane-contract.md §VDC.7): the database-free HostContextResolver’s resolve workload - cache miss calls Sys `GET /v1/resolve/hostname`.
     M2mGrant {
         workload: "sentin8-web-tls",
         scopes: &["sentin8:sys:instances:read"],
@@ -35,7 +35,7 @@ const M2M_GRANTS: &[M2mGrant] = &[
 // Web's bootstrap-tier DB identity (VDC §VDC.3b): the policy boot opens a
 // read-only connection BEFORE any M2M token can exist, so web's role
 // authenticates with SCRAM (platform.sql seeds/converges the password).
-// No tables, no outbox — USAGE/EXECUTE on `public` (the
+// No tables, no outbox - USAGE/EXECUTE on `public` (the
 // `sentin8_boot_policy_load` helper) come from platform.sql's grant lists.
 const PG_ROLES: &[PgRole] = &[PgRole {
     scope: "sentin8:web:admin",
@@ -45,7 +45,7 @@ const PG_ROLES: &[PgRole] = &[PgRole {
     cross_schema_grants: &[],
 }];
 
-/// The OpenAPI spec closure — the web host carries no utoipa spec (its
+/// The OpenAPI spec closure - the web host carries no utoipa spec (its
 /// surface is RFW page rendering), so the closure emits `null`.
 fn openapi_spec() -> serde_json::Value {
     serde_json::Value::Null

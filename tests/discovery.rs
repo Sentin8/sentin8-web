@@ -4,16 +4,16 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! Multi-app discovery + runtime-context proxy integration tests
-//! (web DESIGN §9 — testing-strategy §3 runtime-skip).
+//! (web DESIGN §9 - testing-strategy §3 runtime-skip).
 //!
 //! Covered:
-//! * `discovery_serves_registered_app` — the full multi-app fallback
+//! * `discovery_serves_registered_app` - the full multi-app fallback
 //!   handler (`spa_or_static_multi_app_handler`) resolves the app slug
 //!   from the HTTP `Host` header, reads `captain:app_dir:{slug}` from the
 //!   real Valkey, and serves the app's `index.html` (200).
-//! * `discovery_unknown_hostname_404` — a hostname whose slug has no
+//! * `discovery_unknown_hostname_404` - a hostname whose slug has no
 //!   `captain:app_dir` key is a 404 (never a wrong app's content).
-//! * `proxy_forwards_context_headers` — the runtime-context proxy relays
+//! * `proxy_forwards_context_headers` - the runtime-context proxy relays
 //!   `x-sentin8-*` + `host` headers to the app service and returns the
 //!   instance-metadata JSON. Opt-in (needs `SENTIN8_APP_URL`); skipped
 //!   otherwise, thin by design.
@@ -21,7 +21,7 @@
 //! Runtime-skip gating: Valkey and PostgreSQL are probed at the bottom of
 //! each fixture with hard connect timeouts; when unreachable the test
 //! prints one skip line and passes (the `db_`-style convention of
-//! storage/cron tests). The discovery tests need ONLY Valkey — PostgreSQL
+//! storage/cron tests). The discovery tests need ONLY Valkey - PostgreSQL
 //! is probed once per process so the whole target skips together on an
 //! infra-less host. The proxy test is opt-in via `SENTIN8_APP_URL`.
 
@@ -31,7 +31,7 @@ use axum::body::Body;
 use axum::http::{Request, StatusCode};
 use tower::ServiceExt;
 
-// The web host is a binary-only crate — include the main module the way
+// The web host is a binary-only crate - include the main module the way
 // the cron test crate includes `ticker.rs` (no lib target to import).
 // Its inner `mod policy;` / `mod registration;` resolve to the real
 // `src/` files; dead_code is allowed because only the discovery/proxy
@@ -44,7 +44,7 @@ use web::MultiAppState;
 
 // ── Fixtures ────────────────────────────────────────────────────────────
 
-/// Install the Graviola PQ crypto provider once — reqwest panics with
+/// Install the Graviola PQ crypto provider once - reqwest panics with
 /// "No provider set" when the proxy handler builds its client without one.
 fn install_provider() {
     use std::sync::Once;
@@ -54,14 +54,14 @@ fn install_provider() {
     });
 }
 
-/// A unique app slug per test — the `captain:app_dir:{slug}` key this
+/// A unique app slug per test - the `captain:app_dir:{slug}` key this
 /// test writes is deleted in teardown, but a random slug additionally
 /// guarantees isolation from parallel tests and from real enrolled apps.
 fn mk_slug() -> String {
     format!("it-app-{}", uuid::Uuid::new_v4().simple())
 }
 
-/// A tempdir web root containing `index.html` — the shape the discovery
+/// A tempdir web root containing `index.html` - the shape the discovery
 /// path accepts (root + index.html present).
 fn app_root_with_index(marker: &str) -> (tempfile::TempDir, PathBuf) {
     let tmp = tempfile::tempdir().expect("tempdir");
@@ -95,17 +95,17 @@ async fn valkey_conn() -> Option<glide::GlideClient> {
     {
         Ok(Ok(c)) => Some(c),
         Ok(Err(e)) => {
-            eprintln!("skipping web discovery tests — Valkey unreachable: {e}");
+            eprintln!("skipping web discovery tests - Valkey unreachable: {e}");
             None
         }
         Err(_) => {
-            eprintln!("skipping web discovery tests — Valkey connect timed out");
+            eprintln!("skipping web discovery tests - Valkey connect timed out");
             None
         }
     }
 }
 
-/// PostgreSQL probe — printed once per process so the target skips as a
+/// PostgreSQL probe - printed once per process so the target skips as a
 /// whole when the infra is down (the discovery tests themselves never
 /// touch the DB; the policy boot is not exercised in tests). Bounded by a
 /// connect timeout so a blackholed host cannot stall the skip path.
@@ -118,11 +118,11 @@ async fn postgres_reachable() -> bool {
             true
         }
         Ok(Err(e)) => {
-            eprintln!("skipping web discovery tests — PostgreSQL unreachable: {e}");
+            eprintln!("skipping web discovery tests - PostgreSQL unreachable: {e}");
             false
         }
         Err(_) => {
-            eprintln!("skipping web discovery tests — PostgreSQL connect timed out");
+            eprintln!("skipping web discovery tests - PostgreSQL connect timed out");
             false
         }
     }
@@ -131,7 +131,7 @@ async fn postgres_reachable() -> bool {
 /// Build the multi-app router over the real handlers with a test-local
 /// Valkey connection. Mirrors `build_multi_app_router` minus the TLS
 /// context middleware (the tests drive the handler through the same
-/// public surface, passing `Host` — the L4-proxy fallback the handler
+/// public surface, passing `Host` - the L4-proxy fallback the handler
 /// supports by contract).
 fn test_router(state: MultiAppState) -> axum::Router {
     axum::Router::new()
@@ -154,7 +154,7 @@ async fn register_app(conn: &glide::GlideClient, slug: &str, root: &Path) -> Str
     key
 }
 
-/// Delete the test key — teardown contract: no production keys left behind.
+/// Delete the test key - teardown contract: no production keys left behind.
 async fn delete_key(conn: &glide::GlideClient, key: &str) {
     use glide::AsyncCommands as _;
     let _: Result<i64, _> = conn.del(key).await;
@@ -174,7 +174,7 @@ async fn discovery_serves_registered_app() {
     let (_tmp, root) = app_root_with_index(&slug);
     let key = register_app(&conn, &slug, &root).await;
 
-    // The fallback handler must be exercised with its state attached —
+    // The fallback handler must be exercised with its state attached -
     // the router-level `.fallback(handler).with_state(state)` shape is
     // the same wiring `build_multi_app_router` uses.
     let state = MultiAppState {
@@ -214,7 +214,7 @@ async fn discovery_unknown_hostname_404s() {
     if !postgres_reachable().await {
         return;
     }
-    // An unregistered slug must 404 — never a wrong app's content.
+    // An unregistered slug must 404 - never a wrong app's content.
     let ghost = format!("no-such-app-{}", uuid::Uuid::new_v4().simple());
     let state = MultiAppState {
         valkey: Some(conn.clone()),
@@ -260,7 +260,7 @@ async fn discovery_resolves_slug_from_host_header_under_proxy() {
         valkey: Some(conn.clone()),
     };
     let app = test_router(state);
-    // Host with an explicit port — the port must be stripped before the
+    // Host with an explicit port - the port must be stripped before the
     // slug split (the production proxy case).
     let resp = app
         .oneshot(
@@ -290,9 +290,9 @@ async fn discovery_resolves_slug_from_host_header_under_proxy() {
 /// Opt-in: the proxy's upstream is the app service resolved from
 /// `Sentin8Config` (no `SENTIN8_APP_URL` override exists in production
 /// code), so the test only runs when the operator exports `SENTIN8_APP_URL`
-/// pointing at a reachable app service — the domain it carries re-aims the
+/// pointing at a reachable app service - the domain it carries re-aims the
 /// handler's derived upstream. The probed hostname defaults to
-/// `dash.ops.sys.sentin8.local` (the platform's own app instance — present
+/// `dash.ops.sys.sentin8.local` (the platform's own app instance - present
 /// on every live stack); override with `SENTIN8_APP_TEST_HOSTNAME`. The
 /// response must echo instance metadata (the proxy forwards `x-sentin8-*`
 /// + `host` headers only).
@@ -304,7 +304,7 @@ async fn proxy_forwards_context_headers() {
         .filter(|s| !s.is_empty())
     else {
         eprintln!(
-            "skipping proxy_forwards_context_headers — SENTIN8_APP_URL not set (set it to a reachable sentin8:app base URL to run)"
+            "skipping proxy_forwards_context_headers - SENTIN8_APP_URL not set (set it to a reachable sentin8:app base URL to run)"
         );
         return;
     };
@@ -343,7 +343,7 @@ async fn proxy_forwards_context_headers() {
     assert_eq!(
         status,
         StatusCode::OK,
-        "app runtime context must resolve for {hostname} — body: {body}"
+        "app runtime context must resolve for {hostname} - body: {body}"
     );
     let ctx: serde_json::Value =
         serde_json::from_str(&body).expect("runtime context must be a JSON object");
@@ -355,7 +355,7 @@ async fn proxy_forwards_context_headers() {
     }
 }
 
-/// The org-domain portion of `app.ops.sys.{domain}` — the domain segment
+/// The org-domain portion of `app.ops.sys.{domain}` - the domain segment
 /// the proxy's `Sentin8Config` needs to rebuild the app URL.
 fn domain_from_host(host: &str) -> String {
     // host = "app.ops.sys.sentin8.local" → strip the three service labels.

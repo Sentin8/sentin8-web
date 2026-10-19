@@ -3,15 +3,15 @@
 // SPDX-FileCopyrightText: Copyright Contributors to the Sentin8:Web
 // SPDX-License-Identifier: Apache-2.0
 
-//! Sentin8 Web — single-instance static file server for all Flutter web apps.
+//! Sentin8 Web - single-instance static file server for all Flutter web apps.
 //!
 //! Web is one process that serves **all** Flutter web apps. Apps are
 //! spread across multiple domain directories (`sentin8/apps/`, `bank8/apps/`,
 //! `hotel8/apps/`, …). Web discovers each app's built web directory via
 //! Valkey keys `captain:app_dir:{slug}` (registered by `vertical enroll`),
 //! which contains the exact absolute path to the app's `build/web` directory.
-//! This keeps sentin8 free of hardcoded vertical paths — vertical app
-//! directories are registered at deployment time via the domain registry —
+//! This keeps sentin8 free of hardcoded vertical paths - vertical app
+//! directories are registered at deployment time via the domain registry -
 //! zero compile-time vertical knowledge.
 //!
 //! When a request arrives, `sentin8-tls` injects `X-Sentin8-Hostname` (the
@@ -23,7 +23,7 @@
 //!   web [--port <port>]
 //!
 //! Env vars (set by captain):
-//!   SENTIN8_WEB_PORT — the port to bind
+//!   SENTIN8_WEB_PORT - the port to bind
 //!
 //! Behaviour (ported from the per-app static server):
 //!   - Serves files under {app_dir}/{slug}/build/web
@@ -68,7 +68,7 @@ async fn main() -> anyhow::Result<()> {
     // DB identity (VDC §VDC.3b): the boot pool connects under web's OWN
     // per-service DSN (`SENTIN8_WEB_DATABASE_URL` → `sentin8_web_service`,
     // bootstrap-tier SCRAM). The shared dev DSN (`sentin8_app`) applies
-    // only when the per-service var is unset — local test harnesses; the
+    // only when the per-service var is unset - local test harnesses; the
     // deployed posture is the dedicated role.
     {
         let dsn = std::env::var("SENTIN8_WEB_DATABASE_URL")
@@ -91,7 +91,7 @@ async fn main() -> anyhow::Result<()> {
     // Parse args: [--web-root <dir>] [--port <port>]
     //
     // `--web-root` is used by dash (the platform admin UI) which is a
-    // single-app server — not part of the app-store multi-app discovery.
+    // single-app server - not part of the app-store multi-app discovery.
     // When `--web-root` is given, web serves that single directory for
     // all requests (legacy per-app mode, same as the old static-server).
     let mut web_root_override: Option<String> = std::env::var("SENTIN8_WEB_ROOT")
@@ -121,14 +121,14 @@ async fn main() -> anyhow::Result<()> {
     let addr = format!("0.0.0.0:{port}");
 
     // Build the TLS instance (Acme certs, on-demand SNI resolution, mapping
-    // cache, context middleware — same as any Rust service). The resolver
+    // cache, context middleware - same as any Rust service). The resolver
     // is database-free: cache miss → Sys owner API (TLS-RLS-4).
     let tls = sentin8::tls::Sentin8Tls::builder()
         .service_identity("sentin8:web")
         .build()
         .await?;
 
-    // Traffic counter — counts every inbound request (excludes health checks).
+    // Traffic counter - counts every inbound request (excludes health checks).
     let counter = sentin8::middleware::RequestCounter::new();
     sentin8::middleware::spawn_flush_loop(
         counter.clone(),
@@ -146,7 +146,7 @@ async fn main() -> anyhow::Result<()> {
             .unwrap_or_else(|_| PathBuf::from(&root));
         if !web_root.join("index.html").is_file() {
             anyhow::bail!(
-                "index.html not found in {} — run `flutter build web` first",
+                "index.html not found in {} - run `flutter build web` first",
                 web_root.display()
             );
         }
@@ -167,7 +167,7 @@ async fn main() -> anyhow::Result<()> {
     // ── Multi-app mode ───────────────────────────────────────────────
     // App discovery is via Valkey `captain:app_dir:{slug}` keys (registered
     // by `sentin8-cli vertical enroll`). Each key contains the absolute
-    // path to the app's built web directory. No filesystem scanning —
+    // path to the app's built web directory. No filesystem scanning -
     // Valkey is the single source of truth for app locations.
     tracing::info!(
         service = "sentin8:web",
@@ -184,7 +184,7 @@ async fn main() -> anyhow::Result<()> {
         // Mint-or-load the web workload's Valkey-plane pair in a
         // background loop (the mint races Acme's boot on a fresh
         // platform); once the pair lands, the app-dir client connects on
-        // the next construction — group DESIGN.md §3.1.
+        // the next construction - group DESIGN.md §3.1.
         {
             let issuer = sentin8::config::Sentin8Config::from_env().sentin8_auth_issuer();
             let ca_cert_path = sentin8::auth::m2m::platform_ca_path();
@@ -201,7 +201,7 @@ async fn main() -> anyhow::Result<()> {
                         Err(e) => {
                             tracing::warn!(
                                 error = %e,
-                                "web: Valkey workload identity mint pending — retrying in 10s"
+                                "web: Valkey workload identity mint pending - retrying in 10s"
                             );
                             tokio::time::sleep(std::time::Duration::from_secs(10)).await;
                         }
@@ -268,7 +268,7 @@ fn build_single_app_router(
 #[derive(Clone)]
 pub struct MultiAppState {
     /// Valkey connection manager for looking up `captain:app_dir:{slug}` keys.
-    /// Registered by `vertical enroll` — contains the absolute path to each
+    /// Registered by `vertical enroll` - contains the absolute path to each
     /// app's built web directory.
     pub valkey: Option<glide::GlideClient>,
 }
@@ -284,13 +284,13 @@ struct SingleAppState {
 /// so the app service can resolve the app instance from the hostname.
 ///
 /// PUBLIC, pre-login surface: this is the bootstrap
-/// call every app makes before any user signs in — the Flutter SDK
+/// call every app makes before any user signs in - the Flutter SDK
 /// holds no token yet, and the caller identity is the app instance
 /// established by the TLS-injected `X-Sentin8-App-Id` headers, not a
 /// bearer principal. A bearer-token + Shield
-/// gate here would 401 every app bootstrap — the gate stays off.
+/// gate here would 401 every app bootstrap - the gate stays off.
 /// The response carries only instance metadata (auth domain, branding,
-/// feature flags) — same trust basis as the static app shell.
+/// feature flags) - same trust basis as the static app shell.
 ///
 /// `pub` for the integration tests (`tests/discovery.rs`, web DESIGN §9)
 /// which wire this handler into a test router.
@@ -365,7 +365,7 @@ pub async fn spa_or_static_multi_app_handler(
     //
     // Prefer `X-Sentin8-Hostname` when an L7 layer (sentin8-tls context
     // middleware) injects it. Proxy, however, is L4 (byte-piping) and does
-    // NOT inject that header — so fall back to the HTTP `Host` header (port
+    // NOT inject that header - so fall back to the HTTP `Host` header (port
     // stripped), which carries the original app domain (e.g.
     // `ebank.prod.ibank.local`). Without this fallback the slug is always
     // empty under proxy and every multi-app hostname 404s with
@@ -408,7 +408,7 @@ async fn spa_or_static_single_app_handler(
 }
 
 /// Shared file-serving logic for both single-app and multi-app modes.
-/// `if_none_match` — the caller's `If-None-Match` header value (WEB-4):
+/// `if_none_match` - the caller's `If-None-Match` header value (WEB-4):
 /// a match against the file's ETag short-circuits to 304 without a body.
 async fn serve_from_web_root(web_root: &Path, uri: &Uri, if_none_match: Option<&str>) -> Response {
     let path = uri.path();
@@ -439,13 +439,13 @@ async fn serve_from_web_root(web_root: &Path, uri: &Uri, if_none_match: Option<&
 
 /// Resolve the web root for a given hostname.
 ///
-/// The hostname is the app's domain — e.g. `ebank.prod.ibank.local`.
+/// The hostname is the app's domain - e.g. `ebank.prod.ibank.local`.
 /// The first label (`ebank`) is the app slug.
 ///
 /// Resolution: Valkey `captain:app_dir:{slug}` key (registered by
-/// `vertical enroll`) — contains the absolute path to the built web directory.
+/// `vertical enroll`) - contains the absolute path to the built web directory.
 ///
-/// Discovery is on-the-fly — apps built or registered after startup are
+/// Discovery is on-the-fly - apps built or registered after startup are
 /// served without a restart.
 async fn resolve_web_root(state: &MultiAppState, hostname: &str) -> Option<PathBuf> {
     if hostname.is_empty() {
@@ -531,7 +531,7 @@ async fn serve_file(path: &Path, if_none_match: Option<&str>) -> Response {
                 .first_or_octet_stream()
                 .essence_str()
                 .to_string();
-            // WEB-4: strong validator from size + mtime (no content read —
+            // WEB-4: strong validator from size + mtime (no content read -
             // the body streams from disk). Quoted per RFC 7232.
             let etag = format!(
                 "\"{:x}-{:x}\"",
@@ -660,10 +660,10 @@ fn strip_service_worker_settings(body: &str) -> String {
 // ── Shield policy ──────────────────────────────────────────────────────
 //
 // The policy engine still boots + hot-reloads (uniform enforced posture,
-// enforced posture) — web simply has NO token-bearing handler left to gate:
+// enforced posture) - web simply has NO token-bearing handler left to gate:
 // the runtime-context proxy is public pre-login,
 // static assets are the app shell. WEB_AUTH was removed with the
-// runtime-proxy bearer gate — no verify_bearer_token call sites remain.
+// runtime-proxy bearer gate - no verify_bearer_token call sites remain.
 
 static WEB_POLICY: std::sync::OnceLock<std::sync::Arc<policy::Engine>> = std::sync::OnceLock::new();
 
@@ -672,9 +672,9 @@ static WEB_POLICY: std::sync::OnceLock<std::sync::Arc<policy::Engine>> = std::sy
 /// (refuse-to-start on invalid policy text).
 async fn init_web_policy(pool: &sqlx::PgPool) -> anyhow::Result<()> {
     let engine = policy::engine();
-    // Already inside the tokio runtime (`#[tokio::main]`) — awaited directly
+    // Already inside the tokio runtime (`#[tokio::main]`) - awaited directly
     // by the caller. A nested `Handle::block_on` panics "Cannot start a
-    // runtime from within a runtime" — the caller awaits it directly.
+    // runtime from within a runtime" - the caller awaits it directly.
     sentin8::shield::runtime::boot_full(
         pool,
         &sentin8::config::Sentin8Config::from_env().sentin8_auth_url(),

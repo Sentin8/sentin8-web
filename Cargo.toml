@@ -10,7 +10,7 @@ edition = "2021"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/Sentin8/sentin8-web"
 rust-version = "1.85"
-description = "Sentin8 Sentin8:Web — single-instance static file server for all app-store Flutter web apps, with Sentin8:TLS termination via sentin8-tls."
+description = "Sentin8 Sentin8:Web - single-instance static file server for all app-store Flutter web apps, with Sentin8:TLS termination via sentin8-tls."
 
 [[bin]]
 name = "sentin8-web"
@@ -33,7 +33,7 @@ tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
 dotenvy = "0.15"
 anyhow = "1"
-# Valkey GLIDE — the platform's mandated client engine (group DESIGN.md §3.1).
+# Valkey GLIDE - the platform's mandated client engine (group DESIGN.md §3.1).
 valkey-glide = "0.9.0"
 reqwest = { version = "0.12", features = ["json", "rustls-tls-native-roots-no-provider", "json"], default-features = false }
 rustls = { version = "0.23", features = ["std", "tls12", "logging"], default-features = false }

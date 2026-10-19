@@ -1,4 +1,4 @@
-# Design Doc: Sentin8:Web — Flutter Web Static Host
+# Design Doc: Sentin8:Web - Flutter Web Static Host
 
 ## 1. Summary
 
@@ -22,11 +22,11 @@ proxied to Sentin8:App on the same origin.
 - **Zero compile-time vertical knowledge.** App directories live in every
   workspace (`sentin8/apps/`, `bank8/apps/`, `hotel8/apps/`, …). Hardcoding
   those paths would couple the platform to its verticals; the
-  registry-key discovery keeps the host generic — a newly enrolled app is
+  registry-key discovery keeps the host generic - a newly enrolled app is
   served the moment its key exists.
 - **Same-origin bootstrap.** Flutter apps must fetch their runtime
   context (auth domain, branding, feature flags) before any user signs
-  in — the SDK holds no token yet. Web proxies that call to app on the
+  in - the SDK holds no token yet. Web proxies that call to app on the
   app's own origin so the TLS-injected instance headers establish the
   caller identity; a bearer/Shield gate there is impossible pre-login.
 - **Browser runtime constraints.** Flutter WASM with threads needs
@@ -43,10 +43,10 @@ proxied to Sentin8:App on the same origin.
    the slug is the first DNS label before `.{env}.{org}.{domain}`
    (e.g. `ebank.prod.ibank.local` → `ebank`). Resolution:
    `captain:app_dir:{slug}` Valkey key → absolute path of the built web
-   directory. Discovery is on-the-fly — no restart needed for newly built
+   directory. Discovery is on-the-fly - no restart needed for newly built
    or registered apps.
 2. **Single-app mode (dash).** `--web-root <dir>` (or `SENTIN8_WEB_ROOT`)
-   serves one fixed directory for all requests — the platform dash. The
+   serves one fixed directory for all requests - the platform dash. The
    directory must contain `index.html` (fail-fast otherwise).
 
 Both modes share the file-serving core, differ only in root resolution.
@@ -65,7 +65,7 @@ Client ──TLS──▶ Sentin8:Proxy (L4 SNI) ──▶ sentin8:web (in-proce
 
 - The **context middleware** injects `X-Sentin8-*` headers and strips
   client-supplied copies. Under the L4 proxy (byte-piping, no header
-  injection) the HTTP `Host` header is the fallback hostname source —
+  injection) the HTTP `Host` header is the fallback hostname source -
   without it every proxied hostname would resolve empty.
 - The **runtime-context proxy** forwards only `x-sentin8-*` and `host`
   headers to app's `GET /v1/app/runtime/context` over the platform TLS
@@ -89,12 +89,12 @@ Client ──TLS──▶ Sentin8:Proxy (L4 SNI) ──▶ sentin8:web (in-proce
   cached bootstrap.
 - **Cross-origin isolation**: `COOP: same-origin` and
   `COEP: require-corp` are set on the bootstrap script, `main.dart.js`,
-  and `.wasm` files — required for multi-threaded WASM.
+  and `.wasm` files - required for multi-threaded WASM.
 
 ### 3.4 Policy posture
 
 The Shield engine boots (refuse-to-start on invalid policy text) and
-hot-reloads like every service — uniform enforced posture — but web has no
+hot-reloads like every service - uniform enforced posture - but web has no
 token-bearing handler to gate: static assets are the app shell and the
 runtime-context proxy is public pre-login. The former bearer gate on the
 proxy was removed (it 401'd every app bootstrap; the caller identity is
@@ -109,7 +109,7 @@ hot-reload consumption.
   for app-hostname requests (health and dash mode are unaffected).
 - **`SingleAppState`**: the fixed web root (dash mode).
 - **`Sentin8Tls`**: in-process TLS termination, on-demand SNI cert
-  resolution, context middleware — identical to every other Rust service.
+  resolution, context middleware - identical to every other Rust service.
 - **`strip_service_worker_settings`**: a brace-depth scanner that replaces
   the `serviceWorkerSettings: {…}` object with `{}`, string-safe (a
   literal `}` inside a string does not end the object).
@@ -133,7 +133,7 @@ hot-reload consumption.
   get the patched body.
 - **Public runtime-context proxy instead of shielding it behind auth.**
   The endpoint's response is instance metadata (auth domain, branding,
-  feature flags) — nothing user-scoped — and the transport + TLS-injected
+  feature flags) - nothing user-scoped - and the transport + TLS-injected
   instance headers already establish the caller. Gating it would break
   every first paint.
 
@@ -144,15 +144,15 @@ hot-reload consumption.
    → 404. The unit tests pin traversal protection, SPA fallback, MIME
    handling, and the bootstrap patch.
 2. **Streaming bodies** (`tokio_util::io::ReaderStream`) for non-bootstrap
-   files — large WASM bundles are never fully buffered; content-length
+   files - large WASM bundles are never fully buffered; content-length
    comes from the file metadata.
 3. **Bootstrap responses are read fully and re-encoded** (they are small);
    COOP/COEP headers are attached after the body is built.
-4. **Health endpoint** (`/v1/health`) returns status + build hash —
+4. **Health endpoint** (`/v1/health`) returns status + build hash -
    captain monitors it; it bypasses the traffic counter.
 5. **Hostname resolution falls back from `X-Sentin8-Hostname` to `Host`**
    (port stripped) because the L4 proxy does not inject headers.
-6. **No tables, no migrations, no outbox — own DB identity** — the policy
+6. **No tables, no migrations, no outbox - own DB identity** - the policy
    boot pool connects read-only via `SENTIN8_WEB_DATABASE_URL`
    (`sentin8_web_service` role, declared in the registration and seeded
    by `platform.sql`); the shared dev DSN is only the unset-variable
@@ -162,11 +162,11 @@ hot-reload consumption.
 
 ## 7. Unresolved Questions / Future Designs
 
-- Long-lived immutable assets (`main.dart.js`, `*.wasm`, fonts — Flutter
+- Long-lived immutable assets (`main.dart.js`, `*.wasm`, fonts - Flutter
   fingerprints them) serve `Cache-Control: public, max-age=31536000,
   immutable`; the bootstrap stays `no-store` (a pure header change plus test).
 - ETag/If-None-Match support computes `ETag: "{size}-{mtime}"` (cheap and
-  change-accurate) on first stream and honors `If-None-Match` → 304 — the same
+  change-accurate) on first stream and honors `If-None-Match` → 304 - the same
   handler change as the immutable-cache header.
 
 ---

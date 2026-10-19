@@ -6,7 +6,7 @@
 //! Shield (Sentin8:Policy) integration for web.
 //!
 //! Thin re-export of the shared bridge (`sentin8::shield::runtime`). Web is a
-//! static-file server — static assets and health stay public (the browser
+//! static-file server - static assets and health stay public (the browser
 //! app shell); the app-runtime context proxy is a data surface gated by the
 //! enforced scope-mirror set (the step-5 gate).
 
