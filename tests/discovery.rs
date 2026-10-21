@@ -292,7 +292,7 @@ async fn discovery_resolves_slug_from_host_header_under_proxy() {
 /// code), so the test only runs when the operator exports `SENTIN8_APP_URL`
 /// pointing at a reachable app service - the domain it carries re-aims the
 /// handler's derived upstream. The probed hostname defaults to
-/// `dash.ops.sys.sentin8.local` (the platform's own app instance - present
+/// `dash.ops.sys.local.sentin8.dev` (the platform's own app instance - present
 /// on every live stack); override with `SENTIN8_APP_TEST_HOSTNAME`. The
 /// response must echo instance metadata (the proxy forwards `x-sentin8-*`
 /// + `host` headers only).
@@ -321,7 +321,7 @@ async fn proxy_forwards_context_headers() {
     std::env::set_var("SENTIN8_DOMAIN", domain_from_host(&host));
 
     let hostname = std::env::var("SENTIN8_APP_TEST_HOSTNAME")
-        .unwrap_or_else(|_| "dash.ops.sys.sentin8.local".to_string());
+        .unwrap_or_else(|_| "dash.ops.sys.local.sentin8.dev".to_string());
     let headers: axum::http::HeaderMap = [
         ("x-sentin8-hostname", hostname.as_str()),
         ("host", hostname.as_str()),
@@ -358,6 +358,6 @@ async fn proxy_forwards_context_headers() {
 /// The org-domain portion of `app.ops.sys.{domain}` - the domain segment
 /// the proxy's `Sentin8Config` needs to rebuild the app URL.
 fn domain_from_host(host: &str) -> String {
-    // host = "app.ops.sys.sentin8.local" → strip the three service labels.
+    // host = "app.ops.sys.local.sentin8.dev" → strip the three service labels.
     host.split('.').skip(3).collect::<Vec<_>>().join(".")
 }
