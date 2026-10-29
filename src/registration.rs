@@ -25,7 +25,7 @@ const M2M_GRANTS: &[M2mGrant] = &[
         workload: "sentin8:web-policy",
         scopes: &["sentin8:bus:consume"],
     },
-    // TLS-RLS-4 (design/sentin8-vertical-data-plane-contract.md §VDC.7): the database-free HostContextResolver’s resolve workload - cache miss calls Sys `GET /v1/resolve/hostname`.
+    // (design/sentin8-vertical-data-plane-contract.md §VDC.7): the database-free HostContextResolver’s resolve workload - cache miss calls Sys `GET /v1/resolve/hostname`.
     M2mGrant {
         workload: "sentin8-web-tls",
         scopes: &["sentin8:sys:instances:read"],

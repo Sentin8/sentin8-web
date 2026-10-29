@@ -122,7 +122,7 @@ async fn main() -> anyhow::Result<()> {
 
     // Build the TLS instance (Acme certs, on-demand SNI resolution, mapping
     // cache, context middleware - same as any Rust service). The resolver
-    // is database-free: cache miss → Sys owner API (TLS-RLS-4).
+    // is database-free: cache miss → Sys owner API .
     let tls = sentin8::tls::Sentin8Tls::builder()
         .service_identity("sentin8:web")
         .build()
@@ -343,7 +343,7 @@ async fn health_handler() -> impl IntoResponse {
         axum::Json(serde_json::json!({
             "status": "ok",
             "service": "sentin8:web",
-            // BUILDID-1: version = the joined identity (+git hash, .d on
+            // version = the joined identity (+git hash, .d on
             // debug), build = the raw hash (captain's collapse rule).
             "version": sentin8::build_info::id(),
             "build": sentin8::build_info::build_hash(),
@@ -408,7 +408,7 @@ async fn spa_or_static_single_app_handler(
 }
 
 /// Shared file-serving logic for both single-app and multi-app modes.
-/// `if_none_match` - the caller's `If-None-Match` header value (WEB-4):
+/// `if_none_match` - the caller's `If-None-Match` header value :
 /// a match against the file's ETag short-circuits to 304 without a body.
 async fn serve_from_web_root(web_root: &Path, uri: &Uri, if_none_match: Option<&str>) -> Response {
     let path = uri.path();
@@ -478,7 +478,7 @@ async fn resolve_web_root(state: &MultiAppState, hostname: &str) -> Option<PathB
 /// Serve a single file with appropriate headers. For flutter_bootstrap.js,
 /// strip service-worker registration in-memory before serving.
 ///
-/// Caching (WEB-3/WEB-4, web DESIGN §10):
+/// Caching (/, web DESIGN §10):
 /// - `flutter_bootstrap.js` (runtime settings are baked in per request) and
 ///   `index.html` (references fingerprinted assets) stay `no-store`.
 /// - Fingerprinted assets (`main.dart.js`, `*.wasm`, fonts, other static
@@ -531,7 +531,7 @@ async fn serve_file(path: &Path, if_none_match: Option<&str>) -> Response {
                 .first_or_octet_stream()
                 .essence_str()
                 .to_string();
-            // WEB-4: strong validator from size + mtime (no content read -
+            // strong validator from size + mtime (no content read -
             // the body streams from disk). Quoted per RFC 7232.
             let etag = format!(
                 "\"{:x}-{:x}\"",
@@ -542,7 +542,7 @@ async fn serve_file(path: &Path, if_none_match: Option<&str>) -> Response {
                     .map(|d| d.as_millis())
                     .unwrap_or(0)
             );
-            // WEB-4: `If-None-Match: *` or an exact tag match → 304. The
+            // `If-None-Match: *` or an exact tag match → 304. The
             // header may carry a comma-separated list (`"a", "b"`) or `*`.
             if let Some(inm) = if_none_match {
                 let matches = inm
@@ -580,7 +580,7 @@ async fn serve_file(path: &Path, if_none_match: Option<&str>) -> Response {
                     header::HeaderValue::from_str(&etag)
                         .unwrap_or(header::HeaderValue::from_static("\"\"")),
                 );
-                // WEB-3: index.html must revalidate every load (it
+                // index.html must revalidate every load (it
                 // references fingerprinted assets); everything else is
                 // fingerprinted/immutable content → cache hard.
                 if is_index {

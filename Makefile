@@ -11,7 +11,7 @@
 SHELL := /bin/bash
 CARGO ?= cargo
 
-# This service's identity (from service-registration.json — RS-8).
+# This service's identity (from service-registration.json —).
 SERVICE_TYPES := sentin8:web
 # Trimmed-boot pin (RS §4.5.1-4): this service + acme — the ONE boot-relevant
 # cross-service peer (TLS certs). Everything else fails open (RS §5.1); acme
