@@ -115,7 +115,7 @@ lint: ## cargo fmt -- --check
 
 clean: ## cargo clean
 	@$(CARGO) clean
-
+	@rm -rf .run .run/logs .tmp
 start: ## Start THIS service: infra + trimmed boot if captain is down; idempotent otherwise
 	@test -f $(ROOT_ENV) || { echo "ERROR: no root env — create $(ROOT_ENV) (copy .env.example)" >&2; exit 1; }
 	@if [ -z "$(CLI_BIN)" ] && [ ! -f "$(CLI_DIR)/Cargo.toml" ]; then \
