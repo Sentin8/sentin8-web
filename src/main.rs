@@ -465,7 +465,15 @@ async fn resolve_web_root(state: &MultiAppState, hostname: &str) -> Option<PathB
         let key = format!("captain:app_dir:{slug}");
         use glide::AsyncCommands as _;
         if let Ok(Some(path_str)) = conn.get::<_, Option<String>>(&key).await {
-            let web_root = PathBuf::from(&path_str);
+            // Split-plane remap (group DESIGN.md §3.3 - the core
+            // appliance): the key carries the WRITER's absolute path;
+            // this reader resolves it locally when the appliance env
+            // contract is present (`SENTIN8_APP_DIR_HOST_PREFIX` /
+            // `SENTIN8_APP_DIR_LOCAL_PREFIX`). Unset = the
+            // single-machine shape, returned unchanged.
+            let local =
+                sentin8::config::remap_app_dir(&path_str).unwrap_or(path_str);
+            let web_root = PathBuf::from(&local);
             if web_root.join("index.html").is_file() {
                 return Some(web_root);
             }
