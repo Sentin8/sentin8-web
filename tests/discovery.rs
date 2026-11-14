@@ -110,8 +110,8 @@ async fn valkey_conn() -> Option<glide::GlideClient> {
 /// touch the DB; the policy boot is not exercised in tests). Bounded by a
 /// connect timeout so a blackholed host cannot stall the skip path.
 async fn postgres_reachable() -> bool {
-    let connect =
-        sqlx::postgres::PgPool::connect(sentin8::config::Sentin8Config::default_database_url());
+    let url = sentin8::config::Sentin8Config::default_database_url();
+    let connect = sqlx::postgres::PgPool::connect(&url);
     match tokio::time::timeout(std::time::Duration::from_secs(5), connect).await {
         Ok(Ok(p)) => {
             p.close().await;
