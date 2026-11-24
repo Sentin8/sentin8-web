@@ -56,6 +56,7 @@ pub fn print(section: Option<String>) -> anyhow::Result<()> {
         service_type: "sentin8:web",
         subdomain: "web",
         health_path: "/v1/health",
+        exposure: "external",
         admin_scopes: &[AdminScope::Tuple("sentin8:web:admin", "sentin8:web:admin")],
         error_codes: &[],
         consent_providers: &[],
